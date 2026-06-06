@@ -145,17 +145,44 @@ textarea.form-input { resize: none; }
 <div class="footer">FUJITA YUTAKA © 2024</div>
 
 <script>
-function submitForm() {
+async function submitForm() {
   var name = document.getElementById('rName').value;
   var tel = document.getElementById('rTel').value;
   var date = document.getElementById('rDate').value;
   var guests = document.getElementById('rGuests').value;
+  var note = document.getElementById('rNote').value;
   if (!name || !tel || !date || !guests) {
     alert('必須項目を入力してください');
     return;
   }
-  document.getElementById('successMsg').style.display = 'block';
-  document.getElementById('submitBtn').disabled = true;
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+  var data = new FormData();
+  data.append('お名前', name);
+  data.append('連絡先', tel);
+  data.append('希望日時', date);
+  data.append('人数', guests);
+  data.append('ご要望', note);
+  try {
+    var res = await fetch('https://formspree.io/f/xojzjgpa', {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      document.getElementById('successMsg').style.display = 'block';
+      btn.textContent = '送信済み';
+    } else {
+      alert('送信に失敗しました。もう一度お試しください。');
+      btn.disabled = false;
+      btn.textContent = '予約リクエストを送る';
+    }
+  } catch(e) {
+    alert('通信エラーが発生しました。もう一度お試しください。');
+    btn.disabled = false;
+    btn.textContent = '予約リクエストを送る';
+  }
 }
 </script>
 </body>
